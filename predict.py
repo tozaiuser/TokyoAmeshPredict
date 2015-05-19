@@ -134,8 +134,8 @@ class Predict(object):
             print flow[:, :, 0].min(), flow[:, :, 1].max()  
             self.before = bf_img
             self.after = af_img
-            self.result = self.current
-            #self.result = transform(af_img, flow)
+            #self.result = self.current
+            self.result = transform(af_img, flow)
             
             # Color code the result for better visualization of optical flow. 
             # Direction corresponds to Hue value of the image. 
