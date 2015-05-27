@@ -18,6 +18,7 @@ class RegularOptimizer(object):
 
 	def converged(self):
 		u'''Check convergence condition'''
+		# NEED TO IMPLEMENTATION 
 		if self.iter >= self.max_iters:
 			return True
 		else:

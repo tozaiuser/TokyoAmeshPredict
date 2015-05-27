@@ -62,6 +62,12 @@ class RegularRegist(object):
 
 		self.vgrid = self.optimizer.vgrid
 
-	def transform(self):
-		u'''Transform moving image by vgrid'''
+	def linear_transform(self):
+		u'''Linear transform moving image by vgrid'''
+		# NEED TO IMPLEMENTATION
+		pass
+
+	def cubic_transform(self):
+		u'''Linear transform moving image by vgrid'''
+		# NEED TO IMPLEMENTATION
 		pass
