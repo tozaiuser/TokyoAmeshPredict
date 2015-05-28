@@ -2,6 +2,9 @@
 # -*- coding: utf-8 -*-
 """Optimizer class"""
 
+from math import sqrt
+
+
 class RegularOptimizer(object):
 	u'''Regular gradient descent optimizer'''
 
@@ -13,12 +16,20 @@ class RegularOptimizer(object):
 		self.max_iters = max_iters
 		self.lr = base_lr
 		self.vgrid = vgrid
-		self.vdervgrid = dervgrid
+		self.dervgrid = dervgrid
 		self.cost = None
 
 	def converged(self):
 		u'''Check convergence condition'''
-		# NEED TO IMPLEMENTATION 
+		(g_row, g_col) = self.vgrid.size
+		for i in range(g_row):
+			for j in range(g_col):
+				diff0 = self.lr * self.dervgrid.values[i, j][0]
+				diff1 = self.lr * self.dervgrid.values[i, j][1]
+				val0 = self.vgrid.values[i, j][0]
+				val1 = self.vgrid.values[i, j][1]
+				if sqrt(diff0 ** 2 + diff1 ** 2) < 0.001 * sqrt(val0 ** 2 + val1 ** 2):
+					return True
 		if self.iter >= self.max_iters:
 			return True
 		else:
@@ -30,15 +41,17 @@ class RegularOptimizer(object):
 		if self.converged():
 			return False
 		else:
-			# Update vgrid by vdervgrid
+			# Update vgrid by dervgrid
 			(g_row, g_col) = self.vgrid.size
 			for i in range(g_row):
 				for j in range(g_col):
-					# NEED TO IMPLEMENTATION
-					# self.vgrid[i, j] = ???
-					pass
-
+					diff0 = self.lr * self.dervgrid.values[i, j][0]
+					diff1 = self.lr * self.dervgrid.values[i, j][1]
+					self.vgrid.values[i, j][0] -= diff0
+					self.vgrid.values[i, j][1] -= diff1
 			# Increase interation step
 			print self.iter
 			self.iter += 1
+			if self.iter % 10 == 0:
+				self.lr *= 0.9
 			return True
