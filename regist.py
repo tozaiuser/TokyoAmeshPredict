@@ -11,11 +11,120 @@ def CalMAD(moving, fixed):
 
 def CalMADByGrid(moving, fixed, vgrid):
 	# NEED TO IMPLEMENTATION
-	pass
+	        u'''calculate Mean Absolute Difference'''
+        assert(moving.shape[0:1] == fixed.shape[0:1])
+
+        (ysize,xsize) = moving.shape
+
+        xmax = xsize - 1
+        ymax = ysize - 1
+        Ed = 0
+
+        for y in range(ysize):
+            for x in range(xsize):
+                X = (x // 4) + 1
+                Y = (y // 4) + 1
+                rx = x % 4
+                ry = y % 4
+                flowx = ((4 - rx) * (4 - ry) * vgrid[Y,X,0] + (4 - rx) * ry * vgrid[Y+1,X,0] + rx * (4 - ry) * vgrid[Y,X+1,0] + rx * ry * vgrid[Y+1,X+1,0]) / 16.0
+                flowy = ((4 - rx) * (4 - ry) * vgrid[Y,X,1] + (4 - rx) * ry * vgrid[Y+1,X,1] + rx * (4 - ry) * vgrid[Y,X+1,1] + rx * ry * vgrid[Y+1,X+1,1]) / 16.0
+                xnew = x + flowx
+                ynew = y + flowy
+                g = 0.0
+
+                if xnew >= 0 and xnew < xsize and \
+                    ynew >= 0 and ynew < ysize:
+                    # Linear interpolator inside
+                    px = int(xnew)
+                    py = int(ynew)
+                    dx = xnew - px
+                    dy = ynew - py
+                    px1 = min(px+1, xmax)
+                    py1 = min(py+1, ymax)
+                    g00 = moving[py , px]
+                    g10 = moving[py1, px]
+                    g01 = moving[py , px1]
+                    g11 = moving[py1, px1]
+                    g0  = dx * float(g01) + (1.0 - dx) * float(g00)
+                    g1  = dx * float(g11) + (1.0 - dx) * float(g10)
+                    g   = dy * g1 + (1 - dy) * g0
+                else:
+                    # Nearest interpolator outside
+                    px = int(xnew)
+                    px = max(px, 0)
+                    px = min(px, xmax)
+                    py = int(ynew)
+                    py = max(py, 0)
+                    py = min(py, ymax)
+                    g = moving[py, px]
+                
+                Ed += fabs(fixed[y,x] - g)
+        Ed /= (xmax * ymax)
+        return Ed
+
 
 def CalLinearDeriv(moving, fixed, vgrad, vgrid):
 	# NEED TO IMPLEMENTATION
-	pass
+	(Ysize, Xsize, Z) = vgrid.shape
+        for Y in range(Ysize):
+            y = 4 * Y 
+            for X in range(Xsize):
+                x = 4 * X
+                deri[Y,X,0] = 0
+                deri[Y,X,1] = 0
+                for i in range(-3,4):
+                    if i < 0:
+                        flagi = -1
+                    else:
+                        flagi = 1
+                    for k in range(-3,4):
+                        if k < 0:
+                            flagk = -1
+                        else:
+                            flagk = 1
+
+                        rx = fabs(k)
+                        ry = fabs(i)
+                        flowx = ((4 - rx) * (4 - ry) * vgrid[Y,X,0] + (4 - rx) * ry * vgrid[Y+flagk,X,0] + rx * (4 - ry) * vgrid[Y,X+flagi,0] + rx * ry * vgrid[Y+flagk,X+flagi,0]) / 16.0
+                        flowy = ((4 - rx) * (4 - ry) * vgrid[Y,X,1] + (4 - rx) * ry * vgrid[Y+flagi,X,1] + rx * (4 - ry) * vgrid[Y,X+flagk,1] + rx * ry * vgrid[Y+flagi,X+flagk,1]) / 16.0
+                        xnew = x + flowx
+                        ynew = y + flowy
+                        g = 0
+
+                        if xnew >= 0 and xnew < xsize and \
+                                ynew >= 0 and ynew < ysize:
+                            # Linear interpolator inside
+                            px = int(xnew)
+                            py = int(ynew)
+                            dx = xnew - px
+                            dy = ynew - py
+                            px1 = min(px+1, xmax)
+                            py1 = min(py+1, ymax)
+                            g00 = moving[py , px ]
+                            g10 = moving[py1, px ]
+                            g01 = moving[py , px1]
+                            g11 = moving[py1, px1]
+                            g0  = dx * float(g01) + (1.0 - dx) * float(g00)
+                            g1  = dx * float(g11) + (1.0 - dx) * float(g10)
+                            g   = dy * g1 + (1 - dy) * g0
+                        else:
+                            # Nearest interpolator outside
+                            px = int(xnew)
+                            px = max(px, 0)
+                            px = min(px, xmax)
+                            py = int(ynew)
+                            py = max(py, 0)
+                            py = min(py, ymax)
+                            g = moving[py, px, c]
+
+                        if fixed[y+i,x+k] - g > 0:
+                            flag = -1
+                        else:
+                            flag = 1
+                        deri[Y,X,0] += flag * ((4 - ry) * (4 - rx) / 16) * vgrad[y+i,x+k,0] 
+                        deri[Y,X,1] += flag * ((4 - ry) * (4 - rx) / 16) * vgrad[y+i,x+k,1] 
+                        
+        return deri
 
 def CalCubicDeriv(moving, fixed, vgrad, vgrid):
 	# NEED TO IMPLEMENTATION
